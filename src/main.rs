@@ -1,13 +1,15 @@
 mod flags;
 use crate::flags::FlaggedString;
-use std::{env, fs, io};
+use std::{collections::HashSet, env, fs, io};
 
-fn separate_args<T>(arg_iterator: T) -> (Vec<String>, Vec<String>)
+fn separate_args<T>(arg_iterator: T) -> (Vec<String>, HashSet<String>)
 where
     T: Iterator<Item = String>,
 {
     let (flags, file_paths): (Vec<_>, Vec<_>) =
         arg_iterator.skip(1).partition(|x| x.starts_with("-"));
+
+    let flags = HashSet::from_iter(flags);
 
     if file_paths.len() == 0 {
         eprintln!("Missing file path, aborting.");

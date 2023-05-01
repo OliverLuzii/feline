@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 #[derive(Copy, Clone)]
 enum LineNumbers {
     OmitBlank,
@@ -6,7 +8,7 @@ enum LineNumbers {
 }
 
 impl LineNumbers {
-    fn find(flags: &[String]) -> Self {
+    fn find(flags: &HashSet<String>) -> Self {
         if flags.contains(&"-b".to_string()) {
             return LineNumbers::OmitBlank;
         } else if flags.contains(&"-n".to_string()) {
@@ -27,7 +29,7 @@ enum NonPrintChars {
 }
 
 impl NonPrintChars {
-    fn find(flags: &[String]) -> Self {
+    fn find(flags: &HashSet<String>) -> Self {
         if flags.contains(&"-e".to_string()) && flags.contains(&"-t".to_string()) {
             return NonPrintChars::Both;
         } else if flags.contains(&"-e".to_string()) {
@@ -50,10 +52,10 @@ pub struct FlaggedString {
 }
 
 impl FlaggedString {
-    pub fn new(string: String, flags: &[String]) -> Self {
+    pub fn new(string: String, flags: &HashSet<String>) -> Self {
         Self {
-            line_numbers: LineNumbers::find(flags),
-            non_print_chars: NonPrintChars::find(flags),
+            line_numbers: LineNumbers::find(&flags),
+            non_print_chars: NonPrintChars::find(&flags),
             fold_empty_lines: flags.contains(&"-r".to_string()),
             string: string.chars().filter(|x| !(x == &'\r')).collect(),
         }
@@ -66,15 +68,12 @@ impl FlaggedString {
                 let mut _folded_string = String::new();
 
                 for character in self.string.chars() {
-                    if character == '\n' {
-                        consecutive_newlines += 1;
-                    } else {
-                        consecutive_newlines = 0;
+                    match character {
+                        '\n' => consecutive_newlines += 1,
+                        _ => consecutive_newlines = 0,
                     }
 
-                    if consecutive_newlines > 2 {
-                        continue;
-                    } else {
+                    if consecutive_newlines <= 2 {
                         _folded_string.push(character);
                     }
                 }
