@@ -13,9 +13,9 @@ impl LineNumbers {
             return LineNumbers::OmitBlank;
         } else if flags.contains(&"-n".to_string()) {
             return LineNumbers::Default;
-        } else {
-            return LineNumbers::Off;
         }
+
+        return LineNumbers::Off;
     }
 }
 
@@ -32,15 +32,18 @@ impl NonPrintChars {
     fn find(flags: &HashSet<String>) -> Self {
         if flags.contains(&"-e".to_string()) && flags.contains(&"-t".to_string()) {
             return NonPrintChars::Both;
-        } else if flags.contains(&"-e".to_string()) {
-            return NonPrintChars::EOL;
-        } else if flags.contains(&"-t".to_string()) {
-            return NonPrintChars::TabsAndFormFeeds;
-        } else if flags.contains(&"-v".to_string()) {
-            return NonPrintChars::Default;
-        } else {
-            return NonPrintChars::Off;
         }
+
+        for flag in flags {
+            match flag.as_str() {
+                "-e" => return NonPrintChars::EOL,
+                "-t" => return NonPrintChars::TabsAndFormFeeds,
+                "-v" => return NonPrintChars::Default,
+                _ => return NonPrintChars::Off,
+            }
+        }
+
+        return NonPrintChars::Off;
     }
 }
 
